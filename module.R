@@ -1,28 +1,23 @@
-# kevin.R
-
-# Include your code
-source("./libSetup.R")
+library(data.table)
 library(httr)
 library(jsonlite)
+library(rmarkdown)
+## Weekly report 
 
+weeklyReport <- function (){
+  saveRDS(corTable,file="tables/weeklyReport.Rda")
+}
 
-###############
-
-#Read Data from firebase
-#* @html
-#* @get /fb/data
 readFirebase <- function(){
-  # Example
-  readFirebase <- function(){
-  # Example
+  # Example 
   readData <- GET("https://ourhome-e909b.firebaseio.com/scores.json")
   dd <- content(readData, "text")
   return(jsonlite::fromJSON(dd))
 }
 
 result = readFirebase()
-dataEx <- data.frame(date=character(), type=factor(),
-                     amaze=numeric(0), good=numeric(0), ok=numeric(0),
+dataEx <- data.frame(date=character(), type=factor(), 
+                     amaze=numeric(0), good=numeric(0), ok=numeric(0), 
                      bad = numeric(0), horrible = numeric(0)
                      , stringsAsFactors=T)
 
@@ -30,9 +25,9 @@ for (date in names(result)){
   target = result[[date]]
   if(!is.null(target$dinner)){
     dataEx <- rbind(
-      dataEx,
+      dataEx, 
       data.frame(
-        date=date,
+        date=date, 
         type="dinner",
         amaze= ifelse(is.null(target$dinner$amaze),0,target$dinner$amaze),
         good = ifelse(is.null(target$dinner$good),0,target$dinner$good),
@@ -40,14 +35,14 @@ for (date in names(result)){
         bad = ifelse(is.null(target$dinner$bad),0,target$dinner$bad),
         horrible = ifelse(is.null(target$dinner$horrible),0,target$dinner$horrible)
       )
-    )
+    )  
   }
-
+  
   if(!is.null(target$lunch)){
     dataEx <- rbind(
-      dataEx,
+      dataEx, 
       data.frame(
-        date=date,
+        date=date, 
         type="lunch",
         amaze= ifelse(is.null(target$lunch$amaze),0,target$lunch$amaze),
         good = ifelse(is.null(target$lunch$good),0,target$lunch$good),
@@ -55,14 +50,14 @@ for (date in names(result)){
         bad = ifelse(is.null(target$lunch$bad),0,target$lunch$bad),
         horrible = ifelse(is.null(target$lunch$horrible),0,target$lunch$horrible)
       )
-    )
+    )  
   }
-
+  
   if(!is.null(target$late)){
     dataEx <- rbind(
-      dataEx,
+      dataEx, 
       data.frame(
-        date=date,
+        date=date, 
         type="late",
         amaze= ifelse(is.null(target$late$amaze),0,target$late$amaze),
         good = ifelse(is.null(target$late$good),0,target$late$good),
@@ -70,7 +65,7 @@ for (date in names(result)){
         bad = ifelse(is.null(target$late$bad),0,target$late$bad),
         horrible = ifelse(is.null(target$late$horrible),0,target$late$horrible)
       )
-    )
+    )  
   }
 }
 
@@ -83,7 +78,3 @@ for (idx in 1:nrow(dataEx)){
   barplot(barData, main="Bar Graph")
 }
 dev.off()
-rmarkdown::render('weekly.Rmd')
-rawHTML <- paste(readLines("./weekly.html"), collapse="\n")
-return(rawHTML)
-}
